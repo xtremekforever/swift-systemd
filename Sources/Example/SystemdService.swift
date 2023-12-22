@@ -11,7 +11,7 @@ let notifier = SystemdNotifier()
 notifier.notify(ServiceState.Ready)
 
 print("Waiting for a few seconds before exiting...")
-try await Task.sleep(for: .seconds(3))
+try await Task.sleep(nanoseconds: 3 * 1000 * 1000)
 
 print("Sending Stopping state to systemd...")
 notifier.notify(ServiceState.Stopping)

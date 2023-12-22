@@ -1,7 +1,6 @@
 #if os(Linux)
-import Glibc
-#endif
 @_implementationOnly import CSystemd
+#endif
 
 public enum ServiceState: String {
     case Ready = "READY=1"
@@ -14,6 +13,8 @@ public struct SystemdNotifier {
     }
 
     public func notify(_ state: ServiceState) {
+        #if os(Linux)
         sd_notify(0, state.rawValue)
+        #endif
     }
 }
