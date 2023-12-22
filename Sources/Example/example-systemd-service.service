@@ -2,7 +2,7 @@
 Description=Example Swift Systemd Service
 
 [Service]
-Type=simple
+Type=notify
 WorkingDirectory=/usr/local/bin
 ExecStart=/usr/local/bin/Example
 
