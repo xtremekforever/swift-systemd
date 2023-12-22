@@ -18,8 +18,9 @@ Then, add it to your target `dependencies` section like this:
 
 ## Usage
 
-For now, the library only has the ability to see if the app is running under systemd. To do this,
-`import Systemd` in your app, then use `SystemdHelpers` to get a true or false value:
+Add `import Systemd` to the app use the modules provided by this library.
+
+To see if the app is running under systemd, use the `SystemdHelpers` interface:
 
 ```swift
 if SystemdHelpers.isSystemdService {
@@ -27,4 +28,16 @@ if SystemdHelpers.isSystemdService {
 
     // do things like modify logging format (if using swift-log) or whatever else is needed.
 }
+```
+
+To send signals to systemd about the state of the app, use the `SystemdNotifier` interface:
+
+```swift
+let notifier = SystemdNotifier()
+
+// Call after starting up app (sends READY=1)
+notifier.notify(ServiceState.Ready)
+
+// Call before exiting app (sends STOPPING=1)
+notifier.notify(ServiceState.Stopping)
 ```
