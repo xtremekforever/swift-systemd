@@ -5,8 +5,8 @@ import Glibc
 
 import Foundation
 
-struct SystemdHelpers {
-    static let isSystemdService: Bool = getIsSystemdService()
+public struct SystemdHelpers {
+    public static let isSystemdService: Bool = getIsSystemdService()
 
     private static func getIsSystemdService() -> Bool {
         #if os(Linux)
