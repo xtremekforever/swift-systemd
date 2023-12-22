@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "args": [],
+            "cwd": "${workspaceFolder:swift-systemd}",
+            "name": "Debug Example",
+            "program": "${workspaceFolder:swift-systemd}/.build/debug/Example",
+            "preLaunchTask": "swift: Build Debug Example"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "args": [],
+            "cwd": "${workspaceFolder:swift-systemd}",
+            "name": "Release Example",
+            "program": "${workspaceFolder:swift-systemd}/.build/release/Example",
+            "preLaunchTask": "swift: Build Release Example"
+        }
+    ]
+}
