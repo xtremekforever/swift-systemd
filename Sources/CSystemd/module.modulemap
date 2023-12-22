@@ -1,0 +1,5 @@
+module CSystemd [system] {
+    header "systemd.h"
+    link "systemd"
+    export *
+}

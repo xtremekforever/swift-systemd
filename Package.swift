@@ -12,14 +12,19 @@ let package = Package(
             targets: ["Systemd"]),
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
-        .target(name: "Systemd"),
+        .systemLibrary(name: "CSystemd"),
+        .target(
+            name: "Systemd",
+            dependencies: [
+                "CSystemd"
+            ]
+        ),
         .executableTarget(
             name: "Example",
             dependencies: [
                 "Systemd"
-            ]
+            ],
+            exclude: [ "example-systemd-service.service" ]
         )
     ]
 )
