@@ -23,6 +23,30 @@
             "name": "Release Example",
             "program": "${workspaceFolder:swift-systemd}/.build/release/Example",
             "preLaunchTask": "swift: Build Release Example"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "args": [],
+            "cwd": "${workspaceFolder:swift-systemd}",
+            "name": "Debug ExampleLifecycle",
+            "program": "${workspaceFolder:swift-systemd}/.build/debug/ExampleLifecycle",
+            "preLaunchTask": "swift: Build Debug ExampleLifecycle"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "args": [],
+            "cwd": "${workspaceFolder:swift-systemd}",
+            "name": "Release ExampleLifecycle",
+            "program": "${workspaceFolder:swift-systemd}/.build/release/ExampleLifecycle",
+            "preLaunchTask": "swift: Build Release ExampleLifecycle"
         }
     ]
 }

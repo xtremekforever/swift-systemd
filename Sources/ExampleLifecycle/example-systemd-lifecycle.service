@@ -1,0 +1,10 @@
+[Unit]
+Description=Example Swift Systemd using Service Lifecycle
+
+[Service]
+Type=notify
+WorkingDirectory=/usr/local/bin
+ExecStart=/usr/local/bin/ExampleLifecycle
+
+[Install]
+WantedBy=multi-user.target

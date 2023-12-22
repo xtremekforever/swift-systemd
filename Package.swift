@@ -9,10 +9,12 @@ let package = Package(
         .macOS(.v10_15)
     ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
-        .library(
-            name: "Systemd",
-            targets: ["Systemd"]),
+        .library(name: "Systemd", targets: ["Systemd"]),
+        .library(name: "SystemdLifecycle", targets: ["SystemdLifecycle"])
+    ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-async-algorithms", from: "1.0.0"),
+        .package(url: "https://github.com/swift-server/swift-service-lifecycle.git", from: "2.3.0")
     ],
     targets: [
         .systemLibrary(name: "CSystemd"),
@@ -22,12 +24,23 @@ let package = Package(
                 "CSystemd"
             ]
         ),
+        .target(
+            name: "SystemdLifecycle",
+            dependencies: [
+                .product(name: "AsyncAlgorithms", package: "swift-async-algorithms"),
+                .product(name: "ServiceLifecycle", package: "swift-service-lifecycle"),
+                "Systemd"
+            ]
+        ),
         .executableTarget(
             name: "Example",
-            dependencies: [
-                "Systemd"
-            ],
-            exclude: [ "example-systemd-service.service" ]
+            dependencies: [ "Systemd" ],
+            exclude: [ "example-systemd.service" ]
+        ),
+        .executableTarget(
+            name: "ExampleLifecycle",
+            dependencies: [ "SystemdLifecycle" ],
+            exclude: [ "example-systemd-lifecycle.service" ]
         )
     ]
 )
