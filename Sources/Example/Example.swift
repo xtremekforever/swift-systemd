@@ -12,14 +12,12 @@ if SystemdHelpers.isSystemdService {
     logger.info("Not running as a systemd service...")
 }
 
-let systemdService = SystemdService()
-
 logger.info("Add SystemdService to run as part of a ServiceGroup...")
 logger.info("Send SIGTERM signal to exit the service")
 let serviceGroup = ServiceGroup(
     configuration: .init(
         services: [
-            .init(service: systemdService)
+            .init(service: SystemdService(watchdogEnabled: true, watchdogInterval: .seconds(10)))
         ],
         gracefulShutdownSignals: [.sigterm],
         logger: logger
