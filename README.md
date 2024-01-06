@@ -41,3 +41,26 @@ notifier.notify(ServiceState.Ready)
 // Call before exiting app (sends STOPPING=1)
 notifier.notify(ServiceState.Stopping)
 ```
+
+### Systemd Lifecycle
+
+This repo also contains a separate `SystemdLifecycle` package that can be used by projects that employ the [swift-service-lifecycle](https://github.com/swift-server/swift-service-lifecycle) library to run and manage application services. It can be used by adding the `SystemdLifecycle` target `dependencies` section like this:
+
+```swift
+.product(name: "SystemdLifecycle", package: "swift-systemd")
+```
+
+Then, once the product is imported with `import SystemdLifecycle`, it can be added to a `ServiceGroup`:
+
+```swift
+let serviceGroup = ServiceGroup(
+    configuration: .init(
+        services: [
+            .init(service: SystemdService())
+        ]
+    )
+)
+try await serviceGroup.run()
+```
+
+Since `SystemdService` does not have any dependencies on other services, it can be constructed directly in the services array instead of needing a separate variable.
