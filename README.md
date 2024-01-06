@@ -44,7 +44,9 @@ notifier.notify(ServiceState.Stopping)
 
 ### Systemd Lifecycle
 
-This repo also contains a separate `SystemdLifecycle` package that can be used by projects that employ the [swift-service-lifecycle](https://github.com/swift-server/swift-service-lifecycle) library to run and manage application services. It can be used by adding the `SystemdLifecycle` target `dependencies` section like this:
+This repo also contains a separate `SystemdLifecycle` product that can be used by projects that employ the [swift-service-lifecycle](https://github.com/swift-server/swift-service-lifecycle) library to run and manage application services. It is a simple service that sends the `READY=1` and `STOPPING=1` signals above from the service `run()` method.
+
+It can be used by adding the `SystemdLifecycle` target `dependencies` section like this:
 
 ```swift
 .product(name: "SystemdLifecycle", package: "swift-systemd")
@@ -63,4 +65,4 @@ let serviceGroup = ServiceGroup(
 try await serviceGroup.run()
 ```
 
-Since `SystemdService` does not have any dependencies on other services, it can be constructed directly in the services array instead of needing a separate variable.
+`SystemdService` does not have any dependencies on other services, so it can be constructed and started at any point in the application's service lifecycle.
