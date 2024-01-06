@@ -34,13 +34,8 @@ let package = Package(
         ),
         .executableTarget(
             name: "Example",
-            dependencies: [ "Systemd" ],
-            exclude: [ "example-systemd.service" ]
-        ),
-        .executableTarget(
-            name: "ExampleLifecycle",
             dependencies: [ "SystemdLifecycle" ],
-            exclude: [ "example-systemd-lifecycle.service" ]
+            exclude: [ "example-systemd.service" ]
         )
     ]
 )

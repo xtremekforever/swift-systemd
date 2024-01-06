@@ -1,17 +1,30 @@
+
+import Logging
+import ServiceLifecycle
 import Systemd
+import SystemdLifecycle
+
+let logger = Logger(label: "Example")
 
 if SystemdHelpers.isSystemdService {
-    print("Running as systemd service!")
+    logger.info("Running as systemd service!")
 } else {
-    print("Not running as a systemd service...")
+    logger.info("Not running as a systemd service...")
 }
 
-print("Sending Ready state to systemd...")
-let notifier = SystemdNotifier()
-notifier.notify(ServiceState.Ready)
+let systemdService = SystemdService()
 
-print("Waiting for a few seconds before exiting...")
-try await Task.sleep(nanoseconds: 3 * 1000 * 1000)
+logger.info("Add SystemdService to run as part of a ServiceGroup...")
+logger.info("Send SIGTERM signal to exit the service")
+let serviceGroup = ServiceGroup(
+    configuration: .init(
+        services: [
+            .init(service: systemdService)
+        ],
+        gracefulShutdownSignals: [.sigterm],
+        logger: logger
+    )
+)
+try await serviceGroup.run()
 
-print("Sending Stopping state to systemd...")
-notifier.notify(ServiceState.Stopping)
+logger.info("Exiting application...")

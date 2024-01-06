@@ -1,5 +1,5 @@
 [Unit]
-Description=Example Swift Systemd App
+Description=Example Swift Systemd using Service Lifecycle
 
 [Service]
 Type=notify
