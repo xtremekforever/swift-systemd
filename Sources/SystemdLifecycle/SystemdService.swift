@@ -4,7 +4,14 @@ import ServiceLifecycle
 import Systemd
 
 public struct SystemdService: Service {
-    public init() { }
+    private let _watchdogEnabled: Bool
+    private let _watchdogInterval: Duration
+
+    public init(watchdogEnabled: Bool = false,
+                watchdogInterval: Duration = .seconds(5)) {
+        _watchdogEnabled = watchdogEnabled
+        _watchdogInterval = watchdogInterval
+    }
 
     public func run() async throws {
         let notifier = SystemdNotifier()
@@ -13,8 +20,10 @@ public struct SystemdService: Service {
         notifier.notify(ServiceState.Ready)
 
         // Run the task until cancelled
-        for await _ in AsyncTimerSequence(interval: .seconds(5), clock: .continuous).cancelOnGracefulShutdown() {
-            // TODO: Implement optional systemd watchdog support here
+        for await _ in AsyncTimerSequence(interval: _watchdogInterval, clock: .continuous).cancelOnGracefulShutdown() {
+            if _watchdogEnabled {
+                notifier.notify(ServiceState.Watchdog)
+            }
         }
 
         // Notify of stopping before exiting
