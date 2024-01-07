@@ -16,6 +16,18 @@ Then, add it to your target `dependencies` section like this:
 .product(name: "Systemd", package: "swift-systemd")
 ```
 
+## Dependencies
+
+Although this package may be able to be built on macOS and Windows platforms, it is still only
+functional on Linux, which is the only platform that uses systemd. That being said, to build the
+package in Linux, the `systemd` development headers are needed.
+
+* Debian/Ubuntu: `sudo apt install libsystemd-dev`
+* RHEL/Fedora: `sudo dnf install systemd-devel`
+* SUSE/OpenSUSE: `sudo zypper install systemd-devel`
+
+For other distributions, look in the package repositories for a systemd dev package and install it.
+
 ## Usage
 
 Add `import Systemd` to the app use the modules provided by this library.
