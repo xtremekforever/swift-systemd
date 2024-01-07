@@ -1,5 +1,5 @@
 #if os(Linux)
-@_implementationOnly import CSystemd
+import CSystemd
 #endif
 
 public enum ServiceState: String {
