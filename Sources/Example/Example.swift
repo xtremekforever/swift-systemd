@@ -17,7 +17,7 @@ logger.info("Send SIGTERM signal to exit the service")
 let serviceGroup = ServiceGroup(
     configuration: .init(
         services: [
-            .init(service: SystemdService(watchdogEnabled: true, watchdogInterval: .seconds(10)))
+            .init(service: SystemdService())
         ],
         gracefulShutdownSignals: [.sigterm],
         logger: logger
