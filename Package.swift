@@ -5,9 +5,6 @@ import PackageDescription
 
 let package = Package(
     name: "swift-systemd",
-    platforms: [
-        .macOS(.v10_15)
-    ],
     products: [
         .library(name: "Systemd", targets: ["Systemd"]),
         .library(name: "SystemdLifecycle", targets: ["SystemdLifecycle"])
