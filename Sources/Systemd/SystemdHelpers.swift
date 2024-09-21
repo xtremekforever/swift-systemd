@@ -6,11 +6,33 @@ import CSystemd
 
 import Foundation
 
+/// Helpers to determine if an app is running as a systemd service and get watchdog information.
 public struct SystemdHelpers {
+    /// Whether or not the application is running as a systemd service.
+    ///
+    /// - Returns: `true` if application is supervised by systemd, `false` otherwise.
     public static let isSystemdService: Bool = getIsSystemdService()
+
+    /// Watchdog timeout that is configured in the systemd service file.
+    /// 
+    /// Example: `WatchdogSec=30s`
+    /// 
+    /// - Returns: Watchdog interval as a `Duration`. `nil` if watchdog is not configured.
     public static let watchdogTimeout: Duration? = getWatchdogTimeout()
 
+    /// Whether or not the watchdog is enabled.
+    /// 
+    /// This is a simple variable computed from the `watchdogTimeout` to determine if the
+    /// watchdog is enabled for this service.
+    /// 
+    /// - Returns: `true` if watchdog is enabled/configured, `false` otherwise.
     public static var watchdogEnabled: Bool { watchdogTimeout != nil }
+
+    /// Recommended interval to send watchdog notification.
+    ///
+    /// Defaults to half of the configured watchdog timeout.
+    /// 
+    /// - Returns: `Duration` with the recommended interval, `nil` if not configured.
     public static var watchdogRecommendedNotifyInterval: Duration? { watchdogTimeout.map { $0 / 2 } }
 
     private static func getIsSystemdService() -> Bool {
