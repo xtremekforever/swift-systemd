@@ -18,9 +18,9 @@ Then, add it to your target `dependencies` section like this:
 
 ## Dependencies
 
-Although this package may be able to be built on macOS and Windows platforms, it is still only
-functional on Linux, which is the only platform that uses systemd. That being said, to build the
-package in Linux, the `systemd` development headers are needed.
+Since `systemd` is only supported in Linux, this package is only useable on Linux systems.
+It depends on the `libsystemd` headers and library to be built. These can be installed with
+the following commands on different distributions:
 
 * Debian/Ubuntu: `sudo apt install libsystemd-dev`
 * RHEL/Fedora: `sudo dnf install systemd-devel`
@@ -30,7 +30,23 @@ For other distributions, look in the package repositories for a systemd dev pack
 
 ## Usage
 
-Add `import Systemd` to the app use the modules provided by this library.
+Take this example systemd service file:
+
+```ini
+[Unit]
+Description=My Systemd Service
+
+[Service]
+Type=notify
+WorkingDirectory=/usr/local/bin
+ExecStart=/usr/local/bin/MyService
+WatchdogSec=30
+
+[Install]
+WantedBy=multi-user.target
+```
+
+First, add `import Systemd` to the app use the modules provided by this library.
 
 To see if the app is running under systemd, use the `SystemdHelpers` interface:
 
