@@ -2,12 +2,7 @@ import Foundation
 
 #if os(Linux)
     import CSystemd
-#endif
-
-#if canImport(Glibc)
     import Glibc
-#elseif canImport(Musl)
-    import Musl
 #endif
 
 /// Helpers to determine if an app is running as a systemd service and get watchdog information.
