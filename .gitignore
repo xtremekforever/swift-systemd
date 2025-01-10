@@ -2,4 +2,4 @@
 .build*/
 
 # VSCode
-.vscode/launch.json
+launch.json
