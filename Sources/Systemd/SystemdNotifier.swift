@@ -1,5 +1,5 @@
 #if os(Linux)
-import CSystemd
+    import CSystemd
 #endif
 
 /// Enumeration for state strings that can be sent to systemd.
@@ -14,16 +14,16 @@ public enum ServiceState: String {
 
 /// Send notifications to systemd.
 public struct SystemdNotifier {
-    public init() { }
+    public init() {}
 
     /// Send a notification to systemd.
     ///
     /// For now, all that is supported is calling `sd_notify` to send notifications to systemd.
-    /// 
+    ///
     /// - Parameter state: the `ServiceState` string to send in the notification.
     public func notify(_ state: ServiceState) {
         #if os(Linux)
-        sd_notify(0, state.rawValue)
+            sd_notify(0, state.rawValue)
         #endif
     }
 }

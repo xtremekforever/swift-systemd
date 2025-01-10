@@ -7,7 +7,7 @@ let package = Package(
     name: "swift-systemd",
     products: [
         .library(name: "Systemd", targets: ["Systemd"]),
-        .library(name: "SystemdLifecycle", targets: ["SystemdLifecycle"])
+        .library(name: "SystemdLifecycle", targets: ["SystemdLifecycle"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
@@ -27,13 +27,13 @@ let package = Package(
             dependencies: [
                 .product(name: "AsyncAlgorithms", package: "swift-async-algorithms"),
                 .product(name: "ServiceLifecycle", package: "swift-service-lifecycle"),
-                "Systemd"
+                "Systemd",
             ]
         ),
         .executableTarget(
             name: "Example",
-            dependencies: [ "SystemdLifecycle" ],
-            exclude: [ "example-systemd.service" ]
-        )
+            dependencies: ["SystemdLifecycle"],
+            exclude: ["example-systemd.service"]
+        ),
     ]
 )
