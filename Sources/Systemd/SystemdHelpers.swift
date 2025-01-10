@@ -1,4 +1,8 @@
-import Foundation
+#if canImport(FondationEssentials)
+    import FoundationEssentials
+#else
+    import Foundation
+#endif
 
 #if os(Linux)
     import CSystemd
@@ -6,8 +10,6 @@ import Foundation
 
 #if canImport(Glibc)
     import Glibc
-#elseif canImport(Musl)
-    import Musl
 #endif
 
 /// Helpers to determine if an app is running as a systemd service and get watchdog information.
