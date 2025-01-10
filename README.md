@@ -2,12 +2,33 @@
 
 A simple Swift library to interface with systemd on Linux.
 
+## Compatibility
+
+This library is designed to be API-compatible on non-Linux platforms (like macOS), so if an
+application uses this package it will still compile and run on non-Linux platforms. However,
+systemd-specific calls will have no effect. For example, `SystemdHelpers.isSystemdService` will
+always return `false` on Windows or macOS.
+
+To use this library in Linux, however, the `systemd` libraries are required. These can be installed
+with the following commands on different distributions:
+
+* Debian/Ubuntu: `sudo apt install libsystemd-dev`
+* RHEL/Fedora: `sudo dnf install systemd-devel`
+* SUSE/OpenSUSE: `sudo zypper install systemd-devel`
+
+For other distributions, look in the package repositories for a systemd dev package and install it.
+
+NOTE: This library is *NOT* compatible with Musl as it appears that systemd libraries are still
+[not fully ported to Musl yet](https://catfox.life/2024/09/05/porting-systemd-to-musl-libc-powered-linux/).
+Please open a ticket if this changes so that support can be added for Musl, once this configuration
+is supported.
+
 ## Installation
 
 Add the following dependency to your `Package.swift` file:
 
 ```swift
-.package(url: "https://github.com/xtremekforever/swift-systemd.git", from: "0.0.1")
+.package(url: "https://github.com/xtremekforever/swift-systemd.git", from: "0.1.0")
 ```
 
 Then, add it to your target `dependencies` section like this:
@@ -15,18 +36,6 @@ Then, add it to your target `dependencies` section like this:
 ```swift
 .product(name: "Systemd", package: "swift-systemd")
 ```
-
-## Dependencies
-
-Since `systemd` is only supported in Linux, this package is only useable on Linux systems.
-It depends on the `libsystemd` headers and library to be built. These can be installed with
-the following commands on different distributions:
-
-* Debian/Ubuntu: `sudo apt install libsystemd-dev`
-* RHEL/Fedora: `sudo dnf install systemd-devel`
-* SUSE/OpenSUSE: `sudo zypper install systemd-devel`
-
-For other distributions, look in the package repositories for a systemd dev package and install it.
 
 ## Usage
 
