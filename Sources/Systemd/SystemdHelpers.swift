@@ -17,39 +17,8 @@ public struct SystemdHelpers {
     /// Example: `WatchdogSec=30s`
     ///
     /// - Returns: Watchdog interval as a `Duration`. `nil` if watchdog is not configured.
-    public static let watchdogTimeout: Duration? = getWatchdogTimeout()
-
-    /// Whether or not the watchdog is enabled.
-    ///
-    /// This is a simple variable computed from the `watchdogTimeout` to determine if the
-    /// watchdog is enabled for this service.
-    ///
-    /// - Returns: `true` if watchdog is enabled/configured, `false` otherwise.
-    public static var watchdogEnabled: Bool { watchdogTimeout != nil }
-
-    /// Recommended interval to send watchdog notification.
-    ///
-    /// Defaults to half of the configured watchdog timeout.
-    ///
-    /// - Returns: `Duration` with the recommended interval, `nil` if not configured.
-    public static var watchdogRecommendedNotifyInterval: Duration? { watchdogTimeout.map { $0 / 2 } }
-
-    private static func getIsSystemdService() -> Bool {
-        #if os(Linux)
-            let pid = Glibc.getppid()
-            do {
-                let name = try String(contentsOfFile: "/proc/\(pid)/comm")
-                    .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-                return name == "systemd"
-            } catch {
-                print("Unable to determine if running systemd: \(error)")
-            }
-        #endif
-
-        return false
-    }
-
-    private static func getWatchdogTimeout() -> Duration? {
+    @available(iOS 16.0, tvOS 16.0, watchOS 9.0, *)
+    public static var watchdogTimeout: Duration? {
         #if os(Linux)
             var usec: UInt64 = 0
             let ret = sd_watchdog_enabled(0, &usec)
@@ -65,5 +34,37 @@ public struct SystemdHelpers {
         #else
             return nil
         #endif
+    }
+
+    /// Whether or not the watchdog is enabled.
+    ///
+    /// This is a simple variable computed from the `watchdogTimeout` to determine if the
+    /// watchdog is enabled for this service.
+    ///
+    /// - Returns: `true` if watchdog is enabled/configured, `false` otherwise.
+    @available(iOS 16.0, tvOS 16.0, watchOS 9.0, *)
+    public static var watchdogEnabled: Bool { watchdogTimeout != nil }
+
+    /// Recommended interval to send watchdog notification.
+    ///
+    /// Defaults to half of the configured watchdog timeout.
+    ///
+    /// - Returns: `Duration` with the recommended interval, `nil` if not configured.
+    @available(iOS 16.0, tvOS 16.0, watchOS 9.0, *)
+    public static var watchdogRecommendedNotifyInterval: Duration? { watchdogTimeout.map { $0 / 2 } }
+
+    private static func getIsSystemdService() -> Bool {
+        #if os(Linux)
+            let pid = Glibc.getppid()
+            do {
+                let name = try String(contentsOfFile: "/proc/\(pid)/comm")
+                    .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+                return name == "systemd"
+            } catch {
+                print("Unable to determine if running systemd: \(error)")
+            }
+        #endif
+
+        return false
     }
 }
