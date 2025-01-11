@@ -1,8 +1,4 @@
-#if canImport(FondationEssentials)
-    import FoundationEssentials
-#else
-    import Foundation
-#endif
+import Foundation
 
 #if os(Linux)
     import CSystemd
