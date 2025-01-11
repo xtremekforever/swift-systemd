@@ -1,5 +1,8 @@
-import CSystemd
 import Logging
+
+#if os(Linux)
+    import CSystemd
+#endif
 
 public struct SystemdJournalLogHandler: LogHandler {
     public var logLevel: Logger.Level = .info
@@ -32,22 +35,24 @@ public struct SystemdJournalLogHandler: LogHandler {
         function: String,
         line: UInt
     ) {
-        let effectiveMetadata = Self.prepareMetadata(
-            label: label,
-            level: level,
-            message: message,
-            base: metadata,
-            provider: metadataProvider,
-            explicit: explicitMetadata,
-            source: source,
-            file: file,
-            function: function,
-            line: line
-        )
+        #if os(Linux)
+            let effectiveMetadata = Self.prepareMetadata(
+                label: label,
+                level: level,
+                message: message,
+                base: metadata,
+                provider: metadataProvider,
+                explicit: explicitMetadata,
+                source: source,
+                file: file,
+                function: function,
+                line: line
+            )
 
-        withArrayOfIovecs(effectiveMetadata.map { "\($0)=\($1)" }) { iov in
-            _ = sd_journal_sendv(iov, Int32(iov.count))
-        }
+            withArrayOfIovecs(effectiveMetadata.map { "\($0)=\($1)" }) { iov in
+                _ = sd_journal_sendv(iov, Int32(iov.count))
+            }
+        #endif
     }
 
     public var metadata = Logger.Metadata()
