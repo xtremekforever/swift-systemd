@@ -3,3 +3,6 @@
 
 # VSCode
 launch.json
+
+# Swiftly
+.swift-version
