@@ -26,6 +26,7 @@ let package = Package(
         .target(
             name: "Systemd",
             dependencies: [
+                .product(name: "Logging", package: "swift-log"),
                 "CSystemd"
             ]
         ),
@@ -33,7 +34,6 @@ let package = Package(
             name: "SystemdLifecycle",
             dependencies: [
                 .product(name: "AsyncAlgorithms", package: "swift-async-algorithms"),
-                .product(name: "Logging", package: "swift-log"),
                 .product(name: "ServiceLifecycle", package: "swift-service-lifecycle"),
                 "Systemd",
             ]
