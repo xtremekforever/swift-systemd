@@ -1,4 +1,4 @@
-import Foundation
+import FoundationEssentials
 
 #if os(Linux)
     import CSystemd
@@ -57,8 +57,8 @@ public struct SystemdHelpers {
         #if os(Linux)
             let pid = Glibc.getppid()
             do {
-                let name = try String(contentsOfFile: "/proc/\(pid)/comm")
-                    .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+                let name = try String(contentsOfFile: "/proc/\(pid)/comm", encoding: .utf8)
+                    .trimmingCharacters(while: \.isWhitespace)
                 return name == "systemd"
             } catch {
                 print("Unable to determine if running systemd: \(error)")
