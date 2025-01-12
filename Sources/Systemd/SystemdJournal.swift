@@ -66,44 +66,46 @@ public struct SystemdJournalLogHandler: LogHandler {
         }
     }
 
-    private static func prepareMetadata(
-        label: String,
-        level: Logger.Level,
-        message: Logger.Message,
-        base: Logger.Metadata,
-        provider: Logger.MetadataProvider?,
-        explicit: Logger.Metadata?,
-        source: String,
-        file: String,
-        function: String,
-        line: UInt
-    ) -> Logger.Metadata {
-        var metadata = base
-        let provided = provider?.get() ?? [:]
+    #if os(Linux)
+        private static func prepareMetadata(
+            label: String,
+            level: Logger.Level,
+            message: Logger.Message,
+            base: Logger.Metadata,
+            provider: Logger.MetadataProvider?,
+            explicit: Logger.Metadata?,
+            source: String,
+            file: String,
+            function: String,
+            line: UInt
+        ) -> Logger.Metadata {
+            var metadata = base
+            let provided = provider?.get() ?? [:]
 
-        if !provided.isEmpty {
-            metadata.merge(provided, uniquingKeysWith: { _, provided in provided })
+            if !provided.isEmpty {
+                metadata.merge(provided, uniquingKeysWith: { _, provided in provided })
+            }
+
+            if let explicit = explicit, !explicit.isEmpty {
+                metadata.merge(explicit, uniquingKeysWith: { _, explicit in explicit })
+            }
+
+            // The human-readable message string for this entry
+            metadata["MESSAGE"] = .string(message.description)
+
+            // A priority value between 0 ("emerg") and 7 ("debug")
+            metadata["PRIORITY"] = .string("\(level.syslogPriority)")
+
+            // The code location generating this message, if known.
+            metadata["CODE_FILE"] = .string(file)
+            metadata["CODE_FUNC"] = .string(function)
+            metadata["CODE_LINE"] = .string("\(line)")
+
+            // The name of a unit.
+            metadata["UNIT"] = .string(source)
+            metadata["SYSLOG_IDENTIFIER"] = .string(label)
+
+            return metadata
         }
-
-        if let explicit = explicit, !explicit.isEmpty {
-            metadata.merge(explicit, uniquingKeysWith: { _, explicit in explicit })
-        }
-
-        // The human-readable message string for this entry
-        metadata["MESSAGE"] = .string(message.description)
-
-        // A priority value between 0 ("emerg") and 7 ("debug")
-        metadata["PRIORITY"] = .string("\(level.syslogPriority)")
-
-        // The code location generating this message, if known.
-        metadata["CODE_FILE"] = .string(file)
-        metadata["CODE_FUNC"] = .string(function)
-        metadata["CODE_LINE"] = .string("\(line)")
-
-        // The name of a unit.
-        metadata["UNIT"] = .string(source)
-        metadata["SYSLOG_IDENTIFIER"] = .string(label)
-
-        return metadata
-    }
+    #endif
 }
