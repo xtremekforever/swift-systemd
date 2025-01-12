@@ -10,6 +10,7 @@ import Systemd
 /// Finally, during graceful shutdown, the `Stopping` notification is sent to systemd to let it
 /// know that the application is shutting down.
 ///
+@available(iOS 16.0, tvOS 16.0, watchOS 9.0, *)
 public struct SystemdService: Service {
     public init() {}
 
