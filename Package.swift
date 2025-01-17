@@ -22,12 +22,18 @@ let package = Package(
         .package(url: "https://github.com/swift-server/swift-service-lifecycle.git", from: "2.3.0"),
     ],
     targets: [
-        .systemLibrary(name: "CSystemd"),
+        .systemLibrary(
+            name: "CSystemd",
+            providers: [
+                .apt(["libsystemd-dev"]),
+                .yum(["systemd-devel"]),
+            ]
+        ),
         .target(
             name: "Systemd",
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
-                "CSystemd"
+                "CSystemd",
             ]
         ),
         .target(
