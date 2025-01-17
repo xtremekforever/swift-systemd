@@ -1,12 +1,12 @@
+#if os(Linux)
+    import CSystemd
+    import Glibc
+#endif
+
 #if canImport(FoundationEssentials)
     import FoundationEssentials
 #else
     import Foundation
-#endif
-
-#if os(Linux)
-    import CSystemd
-    import Glibc
 #endif
 
 /// Helpers to determine if an app is running as a systemd service and get watchdog information.
@@ -61,13 +61,8 @@ public struct SystemdHelpers {
         #if os(Linux)
             let pid = Glibc.getppid()
             do {
-                #if canImport(FoundationEssentials)
-                    let name = try String(contentsOfFile: "/proc/\(pid)/comm", encoding: .utf8)
-                        .trimmingCharacters(while: \.isWhitespace)
-                #else
-                    let name = try String(contentsOfFile: "/proc/\(pid)/comm")
-                        .trimmingCharacters(in: CharacterSet.whitespaces)
-                #endif
+                let name = try String(contentsOfFile: "/proc/\(pid)/comm", encoding: .utf8)
+                    .trimmingCharacters(while: \.isWhitespace)
                 return name == "systemd"
             } catch {
                 print("Unable to determine if running systemd: \(error)")
