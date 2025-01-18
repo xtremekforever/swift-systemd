@@ -16,18 +16,20 @@ if SystemdHelpers.isSystemdService {
     logger.info("Not running as a systemd service...")
 }
 
-logger.info("Adding SystemdService to run as part of a ServiceGroup...")
-let serviceGroup = ServiceGroup(
-    configuration: .init(
-        services: [
-            .init(service: SystemdService())
-        ],
-        gracefulShutdownSignals: [.sigterm],
-        logger: logger
+if #available(iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
+    logger.info("Adding SystemdService to run as part of a ServiceGroup...")
+    let serviceGroup = ServiceGroup(
+        configuration: .init(
+            services: [
+                .init(service: SystemdService())
+            ],
+            gracefulShutdownSignals: [.sigterm],
+            logger: logger
+        )
     )
-)
 
-logger.info("Send SIGTERM signal to exit the service")
-try await serviceGroup.run()
+    logger.info("Send SIGTERM signal to exit the service")
+    try await serviceGroup.run()
+}
 
 logger.info("Exiting application...")

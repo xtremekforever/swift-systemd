@@ -1,5 +1,6 @@
 # Swift
 .build*/
+.swiftpm/
 
 # VSCode
 launch.json
