@@ -1,5 +1,7 @@
 # Systemd
 
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fxtremekforever%2Fswift-systemd%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/xtremekforever/swift-systemd)
+
 A simple Swift library to interface with systemd on Linux.
 
 ## Compatibility
