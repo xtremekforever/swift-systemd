@@ -19,6 +19,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
         .package(url: "https://github.com/apple/swift-async-algorithms", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-log", from: "1.6.2"),
+        .package(url: "https://github.com/apple/swift-system", from: "1.4.0"),
         .package(url: "https://github.com/swift-server/swift-service-lifecycle.git", from: "2.3.0"),
     ],
     targets: [
@@ -33,6 +34,7 @@ let package = Package(
             name: "Systemd",
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
+                .product(name: "SystemPackage", package: "swift-system"),
                 "CSystemd",
             ]
         ),
@@ -49,5 +51,9 @@ let package = Package(
             dependencies: ["SystemdLifecycle"],
             exclude: ["example-systemd.service"]
         ),
+        .executableTarget(
+            name: "HostTool",
+            dependencies: ["Systemd"]
+        )
     ]
 )
