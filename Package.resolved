@@ -53,6 +53,15 @@
         "revision" : "c2e97cf6f81510f2d6b4a69453861db65d478560",
         "version" : "2.6.3"
       }
+    },
+    {
+      "identity" : "swift-system",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-system",
+      "state" : {
+        "revision" : "c8a44d836fe7913603e246acab7c528c2e780168",
+        "version" : "1.4.0"
+      }
     }
   ],
   "version" : 2
