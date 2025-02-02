@@ -847,7 +847,7 @@ public final class SystemdBus {
                 nil,
                 m,
                 _sdBusMessageThunk,
-                Unmanaged.passRetained(self).toOpaque(),
+                Unmanaged.passUnretained(self).toOpaque(),
                 UInt64(timeout?.usec ?? 0)
             )
         }
@@ -934,7 +934,7 @@ fileprivate func _sdBusMessageThunk(
     _ userdata: UnsafeMutableRawPointer!,
     _ ret_error: UnsafeMutablePointer<sd_bus_error>! // not used in async callback
 ) -> CInt {
-    let bus = Unmanaged<SystemdBus>.fromOpaque(userdata!).takeRetainedValue()
+    let bus = Unmanaged<SystemdBus>.fromOpaque(userdata!).takeUnretainedValue()
     return bus._resume(with: SystemdMessage(borrowing: m)) ? 1 : 0
 }
 
