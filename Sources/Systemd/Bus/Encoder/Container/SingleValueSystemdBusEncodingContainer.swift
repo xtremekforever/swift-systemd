@@ -54,6 +54,5 @@ struct SingleValueSystemdBusEncodingContainer: SingleValueEncodingContainer {
 
     mutating func encode(_ value: UInt64) throws { try context.encode(value) }
 
-    mutating func encode(_ value: some Encodable) throws
-    { try context.encode(value, codingPath: codingPath) }
+    mutating func encode(_ value: some Encodable) throws { try context.encode(value, codingPath: codingPath) }
 }

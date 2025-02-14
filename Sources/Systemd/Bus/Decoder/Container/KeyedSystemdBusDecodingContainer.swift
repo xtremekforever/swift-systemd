@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 struct KeyedSystemdBusDecodingContainer<Key>: KeyedDecodingContainerProtocol
-    where Key: CodingKey
-{
+where Key: CodingKey {
     let context: SystemdBusTypeContext
 
     let codingPath: [any CodingKey]
@@ -22,10 +21,11 @@ struct KeyedSystemdBusDecodingContainer<Key>: KeyedDecodingContainerProtocol
         keyedBy type: NestedKey.Type,
         forKey key: Key
     ) throws -> KeyedDecodingContainer<NestedKey> where NestedKey: CodingKey {
-        .init(KeyedSystemdBusDecodingContainer<NestedKey>(
-            context: context,
-            codingPath: codingPath + [key]
-        ))
+        .init(
+            KeyedSystemdBusDecodingContainer<NestedKey>(
+                context: context,
+                codingPath: codingPath + [key]
+            ))
     }
 
     func nestedUnkeyedContainer(forKey key: Key) throws -> any UnkeyedDecodingContainer {
@@ -42,18 +42,23 @@ struct KeyedSystemdBusDecodingContainer<Key>: KeyedDecodingContainerProtocol
 
     func decodeNil(forKey key: Key) throws -> Bool { try context.decodeNil() }
 
-    func decode(_ type: Bool.Type, forKey key: Key) throws -> Bool { try _decode(type, forKey: key)
+    func decode(_ type: Bool.Type, forKey key: Key) throws -> Bool {
+        try _decode(type, forKey: key)
     }
 
-    func decode(_ type: String.Type, forKey key: Key) throws -> String { try _decode(
-        type,
-        forKey: key
-    ) }
+    func decode(_ type: String.Type, forKey key: Key) throws -> String {
+        try _decode(
+            type,
+            forKey: key
+        )
+    }
 
-    func decode(_ type: Double.Type, forKey key: Key) throws -> Double { try _decode(
-        type,
-        forKey: key
-    ) }
+    func decode(_ type: Double.Type, forKey key: Key) throws -> Double {
+        try _decode(
+            type,
+            forKey: key
+        )
+    }
 
     func decode(
         _ type: Float.Type,
@@ -100,24 +105,29 @@ struct KeyedSystemdBusDecodingContainer<Key>: KeyedDecodingContainerProtocol
         forKey key: Key
     ) throws -> UInt8 { try _decode(type, forKey: key) }
 
-    func decode(_ type: UInt16.Type, forKey key: Key) throws -> UInt16 { try _decode(
-        type,
-        forKey: key
-    ) }
+    func decode(_ type: UInt16.Type, forKey key: Key) throws -> UInt16 {
+        try _decode(
+            type,
+            forKey: key
+        )
+    }
 
-    func decode(_ type: UInt32.Type, forKey key: Key) throws -> UInt32 { try _decode(
-        type,
-        forKey: key
-    ) }
+    func decode(_ type: UInt32.Type, forKey key: Key) throws -> UInt32 {
+        try _decode(
+            type,
+            forKey: key
+        )
+    }
 
-    func decode(_ type: UInt64.Type, forKey key: Key) throws -> UInt64 { try _decode(
-        type,
-        forKey: key
-    ) }
+    func decode(_ type: UInt64.Type, forKey key: Key) throws -> UInt64 {
+        try _decode(
+            type,
+            forKey: key
+        )
+    }
 
     func decode<T>(_ type: T.Type, forKey key: Key) throws -> T
-        where T: Decodable
-    {
+    where T: Decodable {
         try _decode(type, forKey: key)
     }
 

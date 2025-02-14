@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
 #if canImport(FoundationEssentials)
-import FoundationEssentials
+    import FoundationEssentials
 #else
-import Foundation
+    import Foundation
 #endif
 
 struct SystemdBusDictEntry<Key: Hashable & Codable, Value: Codable>: Codable, Hashable {
@@ -44,7 +44,7 @@ protocol SystemdBusDictRepresentable<Key, Value>: Collection, Codable {
     init(from: SystemdBusDecoderImpl) throws
 
     var count: Int { get }
-    func forEach(_ block: (Key, Value) throws -> ()) rethrows
+    func forEach(_ block: (Key, Value) throws -> Void) rethrows
 }
 
 extension SystemdBusDictRepresentable {
@@ -54,9 +54,10 @@ extension SystemdBusDictRepresentable {
 
 extension Dictionary: SystemdBusDictRepresentable where Key: Codable & Hashable, Value: Codable {
     init(setOfDictEntries set: Set<SystemdBusDictEntry<Key, Value>>) {
-        self = Dictionary(uniqueKeysWithValues: set.map {
-            ($0.key, $0.value)
-        })
+        self = Dictionary(
+            uniqueKeysWithValues: set.map {
+                ($0.key, $0.value)
+            })
     }
 
     init(from systemdBusDecoder: SystemdBusDecoderImpl) throws {
@@ -64,7 +65,7 @@ extension Dictionary: SystemdBusDictRepresentable where Key: Codable & Hashable,
             .init(setOfDictEntries: Set<SystemdBusDictEntry<Key, Value>>(from: systemdBusDecoder))
     }
 
-    func forEach(_ block: (Key, Value) throws -> ()) rethrows {
+    func forEach(_ block: (Key, Value) throws -> Void) rethrows {
         for (key, value) in self {
             try block(key, value)
         }

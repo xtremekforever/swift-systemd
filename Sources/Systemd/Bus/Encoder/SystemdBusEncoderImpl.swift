@@ -12,8 +12,7 @@ struct SystemdBusEncoderImpl: Encoder {
     }
 
     func container<Key>(keyedBy type: Key.Type) -> KeyedEncodingContainer<Key>
-        where Key: CodingKey
-    {
+    where Key: CodingKey {
         .init(KeyedSystemdBusEncodingContainer(context: context, codingPath: codingPath))
     }
 
@@ -47,12 +46,14 @@ extension SystemdBusTypeContext {
             _typeOfAnyValue(T.Value.self)
         )
 
-        try openContainer(type: .array, contents: [
-            .dictEntryBegin,
-            keyType,
-            valueType,
-            .dictEntryEnd,
-        ])
+        try openContainer(
+            type: .array,
+            contents: [
+                .dictEntryBegin,
+                keyType,
+                valueType,
+                .dictEntryEnd,
+            ])
 
         try value.forEach { key, value in
             try openContainer(type: .dictEntry, contents: [keyType, valueType])
@@ -93,10 +94,11 @@ extension SystemdBusTypeContext {
             try context.closeContainer()
         default:
             let structContext = try SystemdBusTypeContext(parentContext: context)
-            try value.encode(to: SystemdBusEncoderImpl(
-                context: structContext,
-                codingPath: codingPath
-            ))
+            try value.encode(
+                to: SystemdBusEncoderImpl(
+                    context: structContext,
+                    codingPath: codingPath
+                ))
             try context.merge(structContext: structContext)
         }
     }

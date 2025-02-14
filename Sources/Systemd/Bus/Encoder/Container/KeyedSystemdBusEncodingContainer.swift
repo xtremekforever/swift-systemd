@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 struct KeyedSystemdBusEncodingContainer<Key>: KeyedEncodingContainerProtocol
-    where Key: CodingKey
-{
+where Key: CodingKey {
     let context: SystemdBusTypeContext
     let codingPath: [any CodingKey]
 
@@ -15,10 +14,11 @@ struct KeyedSystemdBusEncodingContainer<Key>: KeyedEncodingContainerProtocol
         keyedBy keyType: NestedKey.Type,
         forKey key: Key
     ) -> KeyedEncodingContainer<NestedKey> where NestedKey: CodingKey {
-        .init(KeyedSystemdBusEncodingContainer<NestedKey>(
-            context: context,
-            codingPath: codingPath + [key]
-        ))
+        .init(
+            KeyedSystemdBusEncodingContainer<NestedKey>(
+                context: context,
+                codingPath: codingPath + [key]
+            ))
     }
 
     mutating func nestedUnkeyedContainer(forKey key: Key) -> any UnkeyedEncodingContainer {
@@ -79,8 +79,9 @@ struct KeyedSystemdBusEncodingContainer<Key>: KeyedEncodingContainerProtocol
 
     mutating func encode(_ value: UInt64, forKey key: Key) throws { try context.encode(value) }
 
-    mutating func encode(_ value: some Encodable, forKey key: Key) throws
-    { try context.encode(value, codingPath: codingPath + [key]) }
+    mutating func encode(_ value: some Encodable, forKey key: Key) throws {
+        try context.encode(value, codingPath: codingPath + [key])
+    }
 
     mutating func encodeIfPresent(_ value: Bool?, forKey key: Key) throws {
         if let value {

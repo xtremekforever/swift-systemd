@@ -5,7 +5,7 @@ protocol SystemdBusArrayRepresentable: Collection, Codable where Element: Codabl
 
     init(_ elements: [Self.Element])
 
-    func forEach(_ body: (Self.Element) throws -> ()) rethrows
+    func forEach(_ body: (Self.Element) throws -> Void) rethrows
 }
 
 extension SystemdBusArrayRepresentable {

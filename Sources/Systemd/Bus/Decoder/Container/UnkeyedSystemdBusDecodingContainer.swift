@@ -3,7 +3,7 @@
 struct UnkeyedSystemdBusDecodingContainer: UnkeyedDecodingContainer {
     let context: SystemdBusTypeContext
     let codingPath: [any CodingKey]
-    var count: Int? // currently this is not set but it could be for trivial types
+    var count: Int?  // currently this is not set but it could be for trivial types
 
     private(set) var currentIndex: Int = 0
 
@@ -22,13 +22,13 @@ struct UnkeyedSystemdBusDecodingContainer: UnkeyedDecodingContainer {
     }
 
     mutating func nestedContainer<NestedKey>(
-        keyedBy type: NestedKey
-            .Type
+        keyedBy type: NestedKey.Type
     ) throws -> KeyedDecodingContainer<NestedKey> where NestedKey: CodingKey {
-        .init(KeyedSystemdBusDecodingContainer<NestedKey>(
-            context: context,
-            codingPath: codingPath
-        ))
+        .init(
+            KeyedSystemdBusDecodingContainer<NestedKey>(
+                context: context,
+                codingPath: codingPath
+            ))
     }
 
     mutating func nestedUnkeyedContainer() throws -> any UnkeyedDecodingContainer {

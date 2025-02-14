@@ -8,7 +8,7 @@ struct SystemdBusDecoderImpl: Decoder {
     let context: SystemdBusTypeContext
     let codingPath: [any CodingKey]
     var userInfo: [CodingUserInfoKey: Any] { [:] }
-    var count: Int? // TODO: implement for trivial types
+    var count: Int?  // TODO: implement for trivial types
 
     init(context: SystemdBusTypeContext, codingPath: [any CodingKey], count: Int? = nil) {
         self.context = context
@@ -17,8 +17,7 @@ struct SystemdBusDecoderImpl: Decoder {
     }
 
     func container<Key>(keyedBy type: Key.Type) throws -> KeyedDecodingContainer<Key>
-        where Key: CodingKey
-    {
+    where Key: CodingKey {
         .init(KeyedSystemdBusDecodingContainer(context: context, codingPath: codingPath))
     }
 

@@ -12,13 +12,13 @@ struct UnkeyedSystemdBusEncodingContainer: UnkeyedEncodingContainer {
     }
 
     mutating func nestedContainer<NestedKey>(
-        keyedBy keyType: NestedKey
-            .Type
+        keyedBy keyType: NestedKey.Type
     ) -> KeyedEncodingContainer<NestedKey> where NestedKey: CodingKey {
-        .init(KeyedSystemdBusEncodingContainer<NestedKey>(
-            context: context,
-            codingPath: codingPath
-        ))
+        .init(
+            KeyedSystemdBusEncodingContainer<NestedKey>(
+                context: context,
+                codingPath: codingPath
+            ))
     }
 
     mutating func nestedUnkeyedContainer() -> any UnkeyedEncodingContainer {

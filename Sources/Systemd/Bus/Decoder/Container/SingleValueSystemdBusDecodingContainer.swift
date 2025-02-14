@@ -54,5 +54,5 @@ struct SingleValueSystemdBusDecodingContainer: SingleValueDecodingContainer {
     func decode(_ type: UInt64.Type) throws -> UInt64 { try context.decode(type) }
 
     func decode<T>(_ type: T.Type) throws -> T
-        where T: Decodable { try context.decode(type, codingPath: codingPath) }
+    where T: Decodable { try context.decode(type, codingPath: codingPath) }
 }
