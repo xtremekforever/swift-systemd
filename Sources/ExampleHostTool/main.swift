@@ -1,11 +1,10 @@
-#if os(Linux)
-    import Systemd
+import Systemd
 
-    let hostnameInterface = "org.freedesktop.hostname1"
-
-    @main
-    enum HostTool {
-        static func main() async throws {
+@main
+enum HostTool {
+    static func main() async throws {
+        #if os(Linux)
+            let hostnameInterface = "org.freedesktop.hostname1"
             do {
                 let bus = try SystemdBus.system
 
@@ -20,13 +19,8 @@
             } catch {
                 print("error: \(error)")
             }
-        }
-    }
-#else
-    @main
-    enum HostTool {
-        static func main() async throws {
+        #else
             fatalError("systemd not supported on non-Linux platforms")
-        }
+        #endif
     }
-#endif
+}
