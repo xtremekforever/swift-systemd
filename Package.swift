@@ -47,13 +47,13 @@ let package = Package(
             ]
         ),
         .executableTarget(
-            name: "Example",
+            name: "ExampleService",
             dependencies: ["SystemdLifecycle"],
             exclude: ["example-systemd.service"]
         ),
         .executableTarget(
-            name: "HostTool",
+            name: "ExampleHostTool",
             dependencies: ["Systemd"]
-        )
+        ),
     ]
 )
