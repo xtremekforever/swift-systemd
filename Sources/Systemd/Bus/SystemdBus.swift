@@ -3,11 +3,11 @@
     import Dispatch
     import Glibc
 
-    public final class SystemdBus {
+    public actor SystemdBus {
         private typealias Continuation = CheckedContinuation<SystemdMessage, Error>
 
         private let _bus: OpaquePointer
-        private let _continuations = ManagedCriticalState<[UInt64: Continuation]>([:])
+        private var _continuations = [UInt64: Continuation]()
         private var _readSource: DispatchSourceRead?
         private var _writeSource: DispatchSourceWrite?
 
@@ -50,6 +50,10 @@
             return hasMoreMessages != 0
         }
 
+        nonisolated private func _processAll() {
+            Task { while try await _process() {} }
+        }
+
         init(bus: OpaquePointer) throws {
             _bus = sd_bus_ref(bus)
 
@@ -60,7 +64,7 @@
             if try events & POLLIN != 0 {
                 let readSource = DispatchSource.makeReadSource(fileDescriptor: fd)
                 readSource.setEventHandler { [weak self] in
-                    while (try? self?._process()) ?? false {}
+                    self?._processAll()
                 }
                 _readSource = readSource
                 readSource.resume()
@@ -69,7 +73,7 @@
             if try events & POLLOUT != 0 {
                 let writeSource = DispatchSource.makeWriteSource(fileDescriptor: fd)
                 writeSource.setEventHandler { [weak self] in
-                    while (try? self?._process()) ?? false {}
+                    self?._processAll()
                 }
                 _writeSource = writeSource
                 writeSource.resume()
@@ -87,10 +91,8 @@
                 return false
             }
 
-            _continuations.withCriticalRegion { continuations in
-                continuation = continuations[cookie]
-                continuations[cookie] = nil
-            }
+            continuation = _continuations[cookie]
+            _continuations[cookie] = nil
 
             if let continuation {
                 if message.isMethodError {
@@ -104,12 +106,10 @@
         }
 
         private func _cancelAll() {
-            _continuations.withCriticalRegion { continuations in
-                for continuation in continuations.values {
-                    continuation.resume(throwing: CancellationError())
-                }
-                continuations.removeAll()
+            for continuation in _continuations.values {
+                continuation.resume(throwing: CancellationError())
             }
+            _continuations.removeAll()
         }
 
         public func call(
@@ -132,9 +132,7 @@
             }
 
             return try await withCheckedThrowingContinuation { continuation in
-                _continuations.withCriticalRegion { continuations in
-                    try! continuations[message.cookie] = continuation
-                }
+                try! _continuations[message.cookie] = continuation
             }
         }
 
@@ -221,7 +219,9 @@
         _: UnsafeMutablePointer<sd_bus_error>!  // not used in async callback
     ) -> CInt {
         let bus = Unmanaged<SystemdBus>.fromOpaque(userdata!).takeRetainedValue()
-        return bus._resume(with: SystemdMessage(borrowing: m)) ? 1 : 0
+        let message = SystemdMessage(borrowing: m)
+        Task { await  bus._resume(with: message) }
+        return 1
     }
 
     extension Duration {
