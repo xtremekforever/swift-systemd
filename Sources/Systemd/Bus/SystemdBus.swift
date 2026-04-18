@@ -137,8 +137,8 @@
         }
 
         public func callMethod(
-            destination: String,
-            path: String,
+            destination: String = "org.freedesktop.systemd1",
+            path: String = "/org/freedesktop/systemd1",
             interface: String,
             member: String,
             fields: [Any] = [],
