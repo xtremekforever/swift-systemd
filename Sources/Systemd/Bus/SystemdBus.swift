@@ -6,10 +6,16 @@
     public actor SystemdBus {
         private typealias Continuation = CheckedContinuation<SystemdMessage, Error>
 
-        private let _bus: OpaquePointer
+        // _bus, _readSource, and _writeSource are only touched during
+        // init and deinit (which run outside the actor's mailbox); the
+        // actor's serial execution covers the rest of the state.
+        // `OpaquePointer` isn't `Sendable` in the Swift 5 language
+        // surface, so the `let` needs `nonisolated(unsafe)` rather
+        // than plain `nonisolated`.
+        nonisolated(unsafe) private let _bus: OpaquePointer
         private var _continuations = [UInt64: Continuation]()
-        private var _readSource: DispatchSourceRead?
-        private var _writeSource: DispatchSourceWrite?
+        nonisolated(unsafe) private var _readSource: DispatchSourceRead?
+        nonisolated(unsafe) private var _writeSource: DispatchSourceWrite?
 
         public static var system: Self {
             get throws {
@@ -35,7 +41,7 @@
             }
         }
 
-        private var events: CInt {
+        nonisolated private var events: CInt {
             get throws {
                 try throwingSystemdBusError {
                     sd_bus_get_events(_bus)
@@ -207,7 +213,10 @@
         }
 
         deinit {
-            _cancelAll()
+            // sd_bus_call_async retains self via Unmanaged.passRetained,
+            // so deinit only runs once every outstanding callback has
+            // fired and _continuations has drained — no need to cancel
+            // here, and we wouldn't be able to from a nonisolated deinit.
             _readSource?.cancel()
             _writeSource?.cancel()
             sd_bus_unref(_bus)
