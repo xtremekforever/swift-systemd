@@ -15,19 +15,19 @@ public extension SystemdBus {
   ///   - service: The name of the service to start (e.g., "nginx.service")
   ///   - mode: The mode to use when starting the service. Default is `.replace`.
   ///   - timeout: Optional timeout for the operation
-  /// - Returns: The object path of the job
+  /// - Returns: The object path of the job, if reported by systemd
   /// - Throws: SystemdBusError if the operation fails
   @discardableResult
   func startUnit(
     service: String,
     mode: JobMode = .replace,
     timeout: Duration? = nil
-  ) async throws -> Any? {
+  ) async throws -> ObjectPath? {
     try await callManagerMethod(
       "StartUnit",
       fields: [service, mode.rawValue],
       timeout: timeout
-    )
+    ) as? ObjectPath
   }
 
   /// Stop a systemd service unit
@@ -36,19 +36,19 @@ public extension SystemdBus {
   ///   - service: The name of the service to stop (e.g., "nginx.service")
   ///   - mode: The mode to use when stopping the service. Default is `.replace`.
   ///   - timeout: Optional timeout for the operation
-  /// - Returns: The object path of the job
+  /// - Returns: The object path of the job, if reported by systemd
   /// - Throws: SystemdBusError if the operation fails
   @discardableResult
   func stopUnit(
     service: String,
     mode: JobMode = .replace,
     timeout: Duration? = nil
-  ) async throws -> Any? {
+  ) async throws -> ObjectPath? {
     try await callManagerMethod(
       "StopUnit",
       fields: [service, mode.rawValue],
       timeout: timeout
-    )
+    ) as? ObjectPath
   }
 
   /// Reload a systemd service unit
@@ -57,19 +57,19 @@ public extension SystemdBus {
   ///   - service: The name of the service to reload (e.g., "nginx.service")
   ///   - mode: The mode to use when reloading the service. Default is `.replace`.
   ///   - timeout: Optional timeout for the operation
-  /// - Returns: The object path of the job
+  /// - Returns: The object path of the job, if reported by systemd
   /// - Throws: SystemdBusError if the operation fails
   @discardableResult
   func reloadUnit(
     service: String,
     mode: JobMode = .replace,
     timeout: Duration? = nil
-  ) async throws -> Any? {
+  ) async throws -> ObjectPath? {
     try await callManagerMethod(
       "ReloadUnit",
       fields: [service, mode.rawValue],
       timeout: timeout
-    )
+    ) as? ObjectPath
   }
 
   /// Restart a systemd service unit
@@ -78,19 +78,19 @@ public extension SystemdBus {
   ///   - service: The name of the service to restart (e.g., "nginx.service")
   ///   - mode: The mode to use when restarting the service. Default is `.replace`.
   ///   - timeout: Optional timeout for the operation
-  /// - Returns: The object path of the job
+  /// - Returns: The object path of the job, if reported by systemd
   /// - Throws: SystemdBusError if the operation fails
   @discardableResult
   func restartUnit(
     service: String,
     mode: JobMode = .replace,
     timeout: Duration? = nil
-  ) async throws -> Any? {
+  ) async throws -> ObjectPath? {
     try await callManagerMethod(
       "RestartUnit",
       fields: [service, mode.rawValue],
       timeout: timeout
-    )
+    ) as? ObjectPath
   }
 
   /// Try to restart a systemd service unit (only if already running)
@@ -99,19 +99,19 @@ public extension SystemdBus {
   ///   - service: The name of the service to try to restart (e.g., "nginx.service")
   ///   - mode: The mode to use when restarting the service. Default is `.replace`.
   ///   - timeout: Optional timeout for the operation
-  /// - Returns: The object path of the job
+  /// - Returns: The object path of the job, if reported by systemd
   /// - Throws: SystemdBusError if the operation fails
   @discardableResult
   func tryRestartUnit(
     service: String,
     mode: JobMode = .replace,
     timeout: Duration? = nil
-  ) async throws -> Any? {
+  ) async throws -> ObjectPath? {
     try await callManagerMethod(
       "TryRestartUnit",
       fields: [service, mode.rawValue],
       timeout: timeout
-    )
+    ) as? ObjectPath
   }
 
   /// Reload or restart a systemd service unit
@@ -120,19 +120,19 @@ public extension SystemdBus {
   ///   - service: The name of the service to reload or restart (e.g., "nginx.service")
   ///   - mode: The mode to use when reloading or restarting the service. Default is `.replace`.
   ///   - timeout: Optional timeout for the operation
-  /// - Returns: The object path of the job
+  /// - Returns: The object path of the job, if reported by systemd
   /// - Throws: SystemdBusError if the operation fails
   @discardableResult
   func reloadOrRestartUnit(
     service: String,
     mode: JobMode = .replace,
     timeout: Duration? = nil
-  ) async throws -> Any? {
+  ) async throws -> ObjectPath? {
     try await callManagerMethod(
       "ReloadOrRestartUnit",
       fields: [service, mode.rawValue],
       timeout: timeout
-    )
+    ) as? ObjectPath
   }
 
   /// Reload or try to restart a systemd service unit (only if already running)
@@ -141,19 +141,19 @@ public extension SystemdBus {
   ///   - service: The name of the service to reload or try to restart (e.g., "nginx.service")
   ///   - mode: The mode to use when reloading or restarting the service. Default is `.replace`.
   ///   - timeout: Optional timeout for the operation
-  /// - Returns: The object path of the job
+  /// - Returns: The object path of the job, if reported by systemd
   /// - Throws: SystemdBusError if the operation fails
   @discardableResult
   func reloadOrTryRestartUnit(
     service: String,
     mode: JobMode = .replace,
     timeout: Duration? = nil
-  ) async throws -> Any? {
+  ) async throws -> ObjectPath? {
     try await callManagerMethod(
       "ReloadOrTryRestartUnit",
       fields: [service, mode.rawValue],
       timeout: timeout
-    )
+    ) as? ObjectPath
   }
 }
 
@@ -162,9 +162,9 @@ private extension SystemdBus {
   @discardableResult
   func callManagerMethod(
     _ member: String,
-    fields: [Any] = [],
+    fields: [any Sendable] = [],
     timeout: Duration? = nil
-  ) async throws -> Any? {
+  ) async throws -> (any Sendable)? {
     try await callMethod(
       interface: "org.freedesktop.systemd1.Manager",
       member: member,

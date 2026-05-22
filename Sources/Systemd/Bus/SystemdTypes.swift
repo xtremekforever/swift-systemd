@@ -54,8 +54,8 @@
             }
         }
 
-        private func _readArray() throws -> [Any] {
-            var array = [Any]()
+        private func _readArray() throws -> [any Sendable] {
+            var array = [any Sendable]()
 
             try enterContainer()
 
@@ -69,10 +69,10 @@
             return array
         }
 
-        private func _readDictionary() throws -> [AnyHashable: Any] {
+        private func _readDictionary() throws -> [AnyHashable: any Sendable] {
             let contents = _contents!
             let dictEntrySignature = contents[1..<contents.count - 2] + [0]
-            var dict = [AnyHashable: Any]()
+            var dict = [AnyHashable: any Sendable]()
 
             try enterContainer()
 
@@ -98,7 +98,7 @@
             return dict
         }
 
-        func next() throws -> Any? {
+        func next() throws -> (any Sendable)? {
             let r: CInt
 
             (r, _currentType, _contents) = try _peekType()
@@ -107,7 +107,7 @@
                 return nil
             }
 
-            var value: Any?
+            var value: (any Sendable)?
 
             if _currentType == SD_BUS_TYPE_ARRAY {
                 if _isDictionary {
@@ -239,7 +239,7 @@
         }
     }
 
-    protocol SystemdTypeRepresentable {
+    protocol SystemdTypeRepresentable: Sendable {
         static func read(context: SystemdTypeContext) throws -> Self
 
         func append(context: SystemdTypeContext) throws
@@ -519,7 +519,7 @@
         }
     }
 
-    public struct ObjectPath: SystemdTypeRepresentable {
+    public struct ObjectPath: SystemdTypeRepresentable, Sendable {
         public let path: String
 
         static func read(context: SystemdTypeContext) throws -> Self {
@@ -539,7 +539,7 @@
         }
     }
 
-    public struct Signature: SystemdTypeRepresentable {
+    public struct Signature: SystemdTypeRepresentable, Sendable {
         let signature: String
 
         static func read(context: SystemdTypeContext) throws -> Self {
@@ -560,9 +560,9 @@
     }
 
     struct AnyVariant: SystemdTypeRepresentable {
-        let value: Any
+        let value: any Sendable
 
-        init(value: Any) {
+        init(value: any Sendable) {
             self.value = value
         }
 

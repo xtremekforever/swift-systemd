@@ -141,9 +141,9 @@
             path: String = "/org/freedesktop/systemd1",
             interface: String,
             member: String,
-            fields: [Any] = [],
+            fields: [any Sendable] = [],
             timeout: Duration? = nil
-        ) async throws -> Any? {
+        ) async throws -> (any Sendable)? {
             var message: SystemdMessage!
 
             try throwingSystemdBusError {
@@ -164,7 +164,11 @@
             precondition(message != nil)
 
             var context = SystemdTypeContext(message: message)
-            try context.append(fields)
+            // SystemdTypeContext.append takes [Any]; the public signature
+            // is the stricter [any Sendable]. Pass through as [Any] for
+            // the internal serialiser; this is an upcast in spirit (every
+            // `any Sendable` is also `Any`), allocating a single array.
+            try context.append(fields.map { $0 as Any })
 
             let reply = try await call(message, timeout: timeout)
             context = SystemdTypeContext(message: reply)
@@ -177,15 +181,14 @@
             destination: String,
             path: String,
             interface: String
-        ) async throws -> Any? {
-            let properties = try await callMethod(
+        ) async throws -> (any Sendable)? {
+            try await callMethod(
                 destination: destination,
                 path: path,
                 interface: "org.freedesktop.DBus.Properties",
                 member: "GetAll",
                 fields: [interface]
             )
-            return properties
         }
 
         public func getProperty(
@@ -193,15 +196,14 @@
             path: String,
             interface: String,
             member: String? = nil
-        ) async throws -> Any? {
-            let properties = try await callMethod(
+        ) async throws -> (any Sendable)? {
+            try await callMethod(
                 destination: destination,
                 path: path,
                 interface: "org.freedesktop.DBus.Properties",
                 member: "Get",
                 fields: [interface, member ?? ""]
             )
-            return properties
         }
 
         deinit {
