@@ -3,7 +3,11 @@ import ArgumentParser
 import Foundation
 import Systemd
 
+#if compiler(>=5.10)
+extension SystemdBus.JobMode: @retroactive ExpressibleByArgument {}
+#else
 extension SystemdBus.JobMode: ExpressibleByArgument {}
+#endif
 
 @main
 struct SystemdServiceControlExample: AsyncParsableCommand {

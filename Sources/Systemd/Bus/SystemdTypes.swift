@@ -69,10 +69,10 @@
             return array
         }
 
-        private func _readDictionary() throws -> [AnyHashable: any Sendable] {
+        private func _readDictionary() throws -> [_AnyHashableSendable: any Sendable] {
             let contents = _contents!
             let dictEntrySignature = contents[1..<contents.count - 2] + [0]
-            var dict = [AnyHashable: any Sendable]()
+            var dict = [_AnyHashableSendable: any Sendable]()
 
             try enterContainer()
 
@@ -86,11 +86,17 @@
                     break
                 }
                 defer { try? exitContainer() }
-                guard let key = try next() as? any Hashable, let value = try next() else {
+                // SystemdTypeRepresentable refines Sendable (and isn't a
+                // marker protocol), so this cast both validates Hashable
+                // and supplies the Sendable conformance the wrapper init
+                // requires.
+                guard let key = try next() as? any Hashable & SystemdTypeRepresentable,
+                    let value = try next()
+                else {
                     throw SystemdBusError(code: EBADMSG)
                 }
 
-                dict[AnyHashable(key)] = value
+                dict[_AnyHashableSendable(key)] = value
             } while true
 
             try exitContainer()
@@ -315,19 +321,37 @@
         }
     }
 
-    extension AnyHashable: SystemdTypeRepresentable {
-        static func read(context: SystemdTypeContext) throws -> Self {
-            guard let value = try context.next() as? any Hashable else {
-                throw SystemdBusError(code: EBADMSG)
+    /// A Sendable type-erased Hashable, used as the key type of
+    /// dictionaries returned from D-Bus reads.
+    ///
+    /// The standard library's `AnyHashable` is explicitly *not* `Sendable`,
+    /// so a dictionary keyed on it cannot flow through the
+    /// `(any Sendable)?` surface that `SystemdTypeContext.next()` returns.
+    /// This type implements the same erasure but constrains the wrapped
+    /// value to `Hashable & Sendable`, so the result is genuinely
+    /// `Sendable` (no `@unchecked`) without sacrificing hashing or
+    /// equality on the original value.
+    struct _AnyHashableSendable: Hashable, Sendable {
+        let base: any Hashable & Sendable
+
+        private let _hashInto: @Sendable (inout Hasher) -> Void
+        private let _isEqual: @Sendable (_AnyHashableSendable) -> Bool
+
+        init<T: Hashable & Sendable>(_ value: T) {
+            base = value
+            _hashInto = { hasher in value.hash(into: &hasher) }
+            _isEqual = { other in
+                guard let otherValue = other.base as? T else { return false }
+                return otherValue == value
             }
-            return Self(value)
         }
 
-        func append(context: SystemdTypeContext) throws {
-            guard let value = base as? SystemdTypeRepresentable else {
-                throw SystemdBusError(code: EINVAL)
-            }
-            try value.append(context: context)
+        func hash(into hasher: inout Hasher) {
+            _hashInto(&hasher)
+        }
+
+        static func == (lhs: _AnyHashableSendable, rhs: _AnyHashableSendable) -> Bool {
+            lhs._isEqual(rhs)
         }
     }
 
