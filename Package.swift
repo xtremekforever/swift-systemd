@@ -63,5 +63,9 @@ let package = Package(
                 "Systemd",
             ]
         ),
+        .testTarget(
+            name: "SystemdTests",
+            dependencies: ["Systemd", "CSystemd"]
+        ),
     ]
 )
