@@ -142,32 +142,46 @@
             }
         }
 
+        func newMethodCall(
+            destination: String,
+            path: String,
+            interface: String,
+            member: String,
+            autoStart: Bool
+        ) throws -> SystemdMessage {
+            var m: OpaquePointer!
+            try throwingSystemdBusError {
+                sd_bus_message_new_method_call(_bus, &m, destination, path, interface, member)
+            }
+            let message = SystemdMessage(consuming: m)
+            if !autoStart {
+                try message.withMessagePointer { sd_bus_message_set_auto_start($0, 0) }
+            }
+            return message
+        }
+
+        /// Calls a method and returns its first reply argument.
+        ///
+        /// - Parameters:
+        ///   - autoStart: Whether the bus may start `destination` to deliver the call, if
+        ///     it is activatable and not running. When false, the call fails instead.
+        ///   - timeout: How long to wait for the reply; nil is sd-bus's default (25 s).
         public func callMethod(
             destination: String = "org.freedesktop.systemd1",
             path: String = "/org/freedesktop/systemd1",
             interface: String,
             member: String,
             fields: [any Sendable] = [],
+            autoStart: Bool = true,
             timeout: Duration? = nil
         ) async throws -> (any Sendable)? {
-            var message: SystemdMessage!
-
-            try throwingSystemdBusError {
-                var m: OpaquePointer!
-                let r = sd_bus_message_new_method_call(
-                    _bus,
-                    &m,
-                    destination,
-                    path,
-                    interface,
-                    member
-                )
-                guard r >= 0 else { return r }
-                message = SystemdMessage(consuming: m)
-                return 0
-            }
-
-            precondition(message != nil)
+            let message = try newMethodCall(
+                destination: destination,
+                path: path,
+                interface: interface,
+                member: member,
+                autoStart: autoStart
+            )
 
             var context = SystemdTypeContext(message: message)
             // SystemdTypeContext.append takes [Any]; the public signature
@@ -186,14 +200,18 @@
         public func getProperties(
             destination: String,
             path: String,
-            interface: String
+            interface: String,
+            autoStart: Bool = true,
+            timeout: Duration? = nil
         ) async throws -> (any Sendable)? {
             try await callMethod(
                 destination: destination,
                 path: path,
                 interface: "org.freedesktop.DBus.Properties",
                 member: "GetAll",
-                fields: [interface]
+                fields: [interface],
+                autoStart: autoStart,
+                timeout: timeout
             )
         }
 
@@ -201,14 +219,18 @@
             destination: String,
             path: String,
             interface: String,
-            member: String? = nil
+            member: String? = nil,
+            autoStart: Bool = true,
+            timeout: Duration? = nil
         ) async throws -> (any Sendable)? {
             try await callMethod(
                 destination: destination,
                 path: path,
                 interface: "org.freedesktop.DBus.Properties",
                 member: "Get",
-                fields: [interface, member ?? ""]
+                fields: [interface, member ?? ""],
+                autoStart: autoStart,
+                timeout: timeout
             )
         }
 
