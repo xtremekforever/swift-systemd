@@ -1,5 +1,6 @@
 #if os(Linux)
     import CSystemd
+    import SystemPackage
     import XCTest
 
     @testable import Systemd
@@ -39,6 +40,43 @@
                 timeout: .seconds(1)
             )
             XCTAssertNotNil(features as? [any Sendable])
+        }
+
+        /// A peer that never answers, so a call to it can only end by timing out.
+        private final class SilentPeer: @unchecked Sendable {
+            let bus: OpaquePointer
+            let name: String
+
+            init() throws {
+                var bus: OpaquePointer!
+                guard sd_bus_open_user(&bus) >= 0 else { throw XCTSkip("no user bus") }
+                var unique: UnsafePointer<CChar>!
+                guard sd_bus_get_unique_name(bus, &unique) >= 0 else { throw XCTSkip("no unique name") }
+                self.bus = bus
+                name = String(cString: unique)
+            }
+
+            deinit { sd_bus_flush_close_unref(bus) }
+        }
+
+        func testCallsTimeOut() async throws {
+            let peer = try SilentPeer()
+            let bus = try SystemdBus.user
+            let start = ContinuousClock.now
+            do {
+                _ = try await bus.callMethod(
+                    destination: peer.name,
+                    path: "/",
+                    interface: "org.freedesktop.DBus.Peer",
+                    member: "Ping",
+                    timeout: .milliseconds(200)
+                )
+                XCTFail("a silent peer replied")
+            } catch let error as SystemdBusError {
+                XCTAssertEqual(error.code, .timedOut)
+            }
+            XCTAssertLessThan(ContinuousClock.now - start, .seconds(2))
+            withExtendedLifetime(peer) {}
         }
     }
 #endif
