@@ -16,6 +16,8 @@
         private var _continuations = [UInt64: Continuation]()
         nonisolated(unsafe) private var _readSource: DispatchSourceRead?
         nonisolated(unsafe) private var _writeSource: DispatchSourceWrite?
+        // Wakes the bus when sd-bus next has a deadline, so call timeouts fire.
+        nonisolated(unsafe) private let _timerSource: DispatchSourceTimer
 
         public static var system: Self {
             get throws {
@@ -56,12 +58,32 @@
             return hasMoreMessages != 0
         }
 
+        private func _processPending() {
+            while (try? _process()) == true {}
+            _rearmTimer()
+        }
+
         nonisolated private func _processAll() {
-            Task { while try await _process() {} }
+            Task { await _processPending() }
+        }
+
+        /// Schedules the timer for sd-bus's next deadline, a reply timeout, if any.
+        private func _rearmTimer() {
+            var deadline = UInt64.max
+            guard sd_bus_get_timeout(_bus, &deadline) >= 0, deadline != .max else {
+                _timerSource.schedule(deadline: .distantFuture)
+                return
+            }
+            // sd-bus's deadline is CLOCK_MONOTONIC, as DispatchTime's uptime is on Linux
+            let (nanoseconds, overflow) = deadline.multipliedReportingOverflow(by: 1000)
+            _timerSource.schedule(
+                deadline: overflow ? .distantFuture : DispatchTime(uptimeNanoseconds: nanoseconds)
+            )
         }
 
         init(bus: OpaquePointer) throws {
             _bus = sd_bus_ref(bus)
+            _timerSource = DispatchSource.makeTimerSource()
 
             let fd = try throwingSystemdBusError {
                 sd_bus_get_fd(_bus)
@@ -84,6 +106,12 @@
                 _writeSource = writeSource
                 writeSource.resume()
             }
+
+            _timerSource.setEventHandler { [weak self] in
+                self?._processAll()
+            }
+            _timerSource.schedule(deadline: .distantFuture)
+            _timerSource.resume()
         }
 
         public var isOpen: Bool {
@@ -136,6 +164,7 @@
                     timeout?.sdBusMicroseconds ?? 0
                 )
             }
+            _rearmTimer()
 
             return try await withCheckedThrowingContinuation { continuation in
                 try! _continuations[message.cookie] = continuation
@@ -241,6 +270,7 @@
             // here, and we wouldn't be able to from a nonisolated deinit.
             _readSource?.cancel()
             _writeSource?.cancel()
+            _timerSource.cancel()
             sd_bus_unref(_bus)
         }
     }
