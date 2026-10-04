@@ -78,5 +78,35 @@
             XCTAssertLessThan(ContinuousClock.now - start, .seconds(2))
             withExtendedLifetime(peer) {}
         }
+
+        func testPrivateConnection() async throws {
+            let bus: SystemdBus
+            do {
+                bus = try SystemdBus.openSystem()
+            } catch {
+                throw XCTSkip("no system bus: \(error)")
+            }
+            let id = try await bus.getProperty(
+                destination: "org.freedesktop.DBus",
+                path: "/org/freedesktop/DBus",
+                interface: "org.freedesktop.DBus",
+                member: "Features",
+                autoStart: false,
+                timeout: .seconds(1)
+            )
+            XCTAssertNotNil(id as? [any Sendable])
+
+            // an idle connection must not keep the process busy
+            var before = rusage(), after = rusage()
+            getrusage(RUSAGE_SELF.rawValue, &before)
+            try await Task.sleep(for: .milliseconds(500))
+            getrusage(RUSAGE_SELF.rawValue, &after)
+            let cpu = (after.ru_utime.tv_sec - before.ru_utime.tv_sec) * 1_000_000
+                + (after.ru_utime.tv_usec - before.ru_utime.tv_usec)
+                + (after.ru_stime.tv_sec - before.ru_stime.tv_sec) * 1_000_000
+                + (after.ru_stime.tv_usec - before.ru_stime.tv_usec)
+            XCTAssertLessThan(cpu, 100_000, "µs of CPU while idle")
+            withExtendedLifetime(bus) {}
+        }
     }
 #endif

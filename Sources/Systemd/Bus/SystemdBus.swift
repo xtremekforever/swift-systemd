@@ -43,6 +43,29 @@
             }
         }
 
+        /// A new connection to the system bus of this actor's own.
+        ///
+        /// ``system`` wraps the calling thread's shared default connection, so two
+        /// instances got on one thread drive one `sd_bus` from two actors. A private
+        /// connection is serialised by this actor alone, and closes when it is released.
+        public static func openSystem() throws -> Self {
+            try _open(sd_bus_open_system)
+        }
+
+        /// A new connection to the user bus of this actor's own; see ``openSystem()``.
+        public static func openUser() throws -> Self {
+            try _open(sd_bus_open_user)
+        }
+
+        private static func _open(
+            _ open: (UnsafeMutablePointer<OpaquePointer?>) -> CInt
+        ) throws -> Self {
+            var sd: OpaquePointer?
+            try throwingSystemdBusError { open(&sd) }
+            defer { sd_bus_unref(sd) }
+            return try .init(bus: sd!)
+        }
+
         nonisolated private var events: CInt {
             get throws {
                 try throwingSystemdBusError {
