@@ -69,6 +69,19 @@
             return array
         }
 
+        /// A struct's fields, in order.
+        private func _readStruct() throws -> [any Sendable] {
+            var fields = [any Sendable]()
+
+            try enterContainer()
+            while let field = try next() {
+                fields.append(field)
+            }
+            try exitContainer()
+
+            return fields
+        }
+
         private func _readDictionary() throws -> [_AnyHashableSendable: any Sendable] {
             let contents = _contents!
             let dictEntrySignature = contents[1..<contents.count - 2] + [0]
@@ -121,6 +134,8 @@
                 } else {
                     value = try _readArray()
                 }
+            } else if _currentType == SD_BUS_TYPE_STRUCT {
+                value = try _readStruct()
             } else {
                 guard let swiftType = _systemdTypeToSwiftType(_currentType) else {
                     throw SystemdBusError(code: EBADMSG)
