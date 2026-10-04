@@ -133,7 +133,7 @@
                     m,
                     _sdBusMessageThunk,
                     Unmanaged.passRetained(self).toOpaque(),
-                    UInt64(timeout?.usec ?? 0)
+                    timeout?.sdBusMicroseconds ?? 0
                 )
             }
 
@@ -236,9 +236,17 @@
     }
 
     extension Duration {
-        fileprivate var usec: Double {
-            let v = components
-            return Double(v.seconds) * 10_000_000 + Double(v.attoseconds) * 1e-12
+        /// The duration as an sd-bus `usec_t` timeout, rounded up to whole microseconds.
+        /// 0 means "the default" to sd-bus, so a zero or negative duration is 1 µs, and
+        /// one too long for `usec_t` is `UINT64_MAX`, which sd-bus treats as no timeout.
+        var sdBusMicroseconds: UInt64 {
+            guard self > .zero else { return 1 }
+            let (seconds, attoseconds) = components
+            let attosecondsPerMicrosecond: Int64 = 1_000_000_000_000
+            let fraction = (attoseconds + attosecondsPerMicrosecond - 1) / attosecondsPerMicrosecond
+            let (whole, overflow) = UInt64(seconds).multipliedReportingOverflow(by: 1_000_000)
+            let (usec, carry) = whole.addingReportingOverflow(UInt64(fraction))
+            return overflow || carry ? .max : usec
         }
     }
 
